@@ -19,6 +19,7 @@ from .rows import Row, AsyncRowFactory, tuple_row, TupleRow
 from ._enums import IsolationLevel
 from ._compat import asynccontextmanager
 from .conninfo import make_conninfo, conninfo_to_dict
+from ._encodings import pgconn_encoding
 from .connection import BaseConnection, CursorRow, Notify
 from .generators import notifies
 from .transaction import AsyncTransaction
@@ -262,7 +263,7 @@ class AsyncConnection(BaseConnection[Row]):
         while 1:
             async with self.lock:
                 ns = await self.wait(notifies(self.pgconn))
-            enc = self.client_encoding
+            enc = pgconn_encoding(self.pgconn)
             for pgn in ns:
                 n = Notify(
                     pgn.relname.decode(enc), pgn.extra.decode(enc), pgn.be_pid
